@@ -1,0 +1,57 @@
+body {
+  background-image: url("./assets/root.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  display: flex;
+  /* ✅ removed z-index: -1 */
+}
+
+.pagecontainer {
+  display: flex;
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  height: 95vh;
+  width: 95vw;
+  overflow: hidden;        /* ✅ keeps children inside rounded corners */
+}
+
+.searchbar {
+  display: flex;
+  position: relative;
+  width: 100%;
+  padding: 20px;
+}
+
+.searchbar__icon {        /* ✅ double underscore */
+  position: absolute;
+  left: 2%;
+  top: 5.5%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+}
+
+.searchbar__input {       /* ✅ double underscore */
+  width: 20%;
+  height: 38px;
+  padding: 10px 10px 10px 36px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.searchbar__input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}

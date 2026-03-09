@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Chat Panel</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #181b23;
+      --surface2: #1f2330;
+      --border: #2a2d3a;
+      --accent: #6366f1;
+      --accent-light: rgba(99,102,241,0.12);
+      --green: #4ade80;
+      --text: #e8eaf6;
+      --muted: #6b7099;
+      --admin-bubble: #6366f1;
+      --user-bubble: #1f2330;
+      --shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 300px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-header h1 {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .sidebar-header p {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .connect-bar {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+    }
+
+    .connect-bar button {
+      flex: 1;
+      padding: 8px;
+      border-radius: 8px;
+      border: none;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+      transition: opacity 0.2s;
+    }
+    .connect-bar button:hover { opacity: 0.85; }
+
+    .conn-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #f87171; flex-shrink: 0; }
+    .dot.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+    .users-title {
+      padding: 12px 16px 8px;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+    }
+
+    .users-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .users-list::-webkit-scrollbar { width: 3px; }
+    .users-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+    .user-item {
+      padding: 13px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+      position: relative;
+    }
+
+    .user-item:hover { background: var(--surface2); }
+    .user-item.active { background: var(--accent-light); border-left: 3px solid var(--accent); }
+
+    .user-item .u-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .user-item .u-preview {
+      font-size: 0.73rem;
+      color: var(--muted);
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-item .u-time {
+      font-size: 0.65rem;
+      color: var(--muted);
+      position: absolute;
+      top: 13px;
+      right: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      font-size: 0.62rem;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 1px 6px;
+      margin-left: 6px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .empty-users {
+      padding: 32px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.7;
+    }
+
+    /* ── CHAT PANEL ── */
+    .chat-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-topbar {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .chat-topbar .room-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--accent-light);
+      border: 1.5px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .chat-topbar h2 { font-size: 0.95rem; font-weight: 700; }
+    .chat-topbar p { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .messages::-webkit-scrollbar { width: 4px; }
+    .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .no-chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      gap: 12px;
+    }
+    .no-chat .icon { font-size: 3rem; opacity: 0.3; }
+    .no-chat p { font-size: 0.85rem; }
+
+    .msg-row {
+      display: flex;
+      flex-direction: column;
+      animation: popIn 0.2s ease;
+    }
+    .msg-row.admin { align-items: flex-end; }
+    .msg-row.user  { align-items: flex-start; }
+
+    .msg-bubble {
+      max-width: 70%;
+      padding: 11px 16px;
+      border-radius: 18px;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+
+    .msg-row.admin .msg-bubble {
+      background: var(--admin-bubble);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .msg-row.user .msg-bubble {
+      background: var(--user-bubble);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg-meta {
+      font-size: 0.67rem;
+      color: var(--muted);
+      margin-top: 4px;
+      padding: 0 4px;
+    }
+
+    .system-msg {
+      align-self: center;
+      font-size: 0.7rem;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px dashed var(--border);
+      border-radius: 20px;
+      padding: 4px 14px;
+      text-align: center;
+    }
+
+    /* Input */
+    .input-area {
+      display: flex;
+      gap: 10px;
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .input-area input {
+      flex: 1;
+      padding: 12px 16px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-area input:focus { border-color: var(--accent); }
+    .input-area input::placeholder { color: var(--muted); }
+    .input-area input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-send {
+      width: 46px;
+      height: 46px;
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s, transform 0.1s;
+      flex-shrink: 0;
+    }
+    .btn-send:hover { opacity: 0.85; transform: scale(1.05); }
+    .btn-send:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+    .btn-send svg { fill: white; width: 20px; height: 20px; }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.95) translateY(6px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h1>🎛️ Admin Panel</h1>
+    <p>Manage user conversations</p>
+  </div>
+
+  <div class="connect-bar">
+    <button onclick="connectAdmin()">Connect as Admin</button>
+    <div class="conn-status">
+      <div class="dot" id="dot"></div>
+      <span id="connLabel">off</span>
+    </div>
+  </div>
+
+  <div class="users-title">Active Conversations</div>
+  <div class="users-list" id="usersList">
+    <div class="empty-users">No conversations yet.<br/>Connect and wait for users.</div>
+  </div>
+</div>
+
+<!-- CHAT PANEL -->
+<div class="chat-panel">
+  <div class="chat-topbar" id="chatTopbar">
+    <div class="no-chat" style="padding: 0; flex-direction: row; color: var(--muted); font-size:0.85rem;">
+      <span>← Select a conversation to start</span>
+    </div>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="no-chat">
+      <div class="icon">💬</div>
+      <p>Select a user to view their chat</p>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <input type="text" id="msgInput" placeholder="Select a conversation first..." disabled onkeydown="if(event.key==='Enter') sendMessage()" />
+    <button class="btn-send" id="sendBtn" onclick="sendMessage()" disabled>
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  const SERVER_URL = "http://localhost:4000";
+  let socket = null;
+  let activeRoomId = null;
+  const rooms = {}; // roomId -> { messages: [], name, lastMessage, lastTime, unread }
+
+  function connectAdmin() {
+    if (socket && socket.connected) return;
+
+    socket = io(SERVER_URL, { transports: ["websocket", "polling"] });
+
+    socket.on("connect", () => {
+      document.getElementById("dot").className = "dot on";
+      document.getElementById("connLabel").textContent = "online";
+      loadAllRooms();
+    });
+
+    socket.on("disconnect", () => {
+      document.getElementById("dot").className = "dot";
+      document.getElementById("connLabel").textContent = "off";
+    });
+
+    // Listen for incoming messages from any room
+    socket.on("chatMessage", (data) => {
+      const { roomId } = data;
+
+      if (!rooms[roomId]) {
+        rooms[roomId] = { messages: [], name: data.senderName || roomId, lastMessage: "", lastTime: null, unread: 0 };
+      }
+
+      rooms[roomId].messages.push(data);
+      rooms[roomId].lastMessage = data.message;
+      rooms[roomId].lastTime = data.timestamp;
+
+      if (data.sender !== "admin") {
+        if (roomId !== activeRoomId) rooms[roomId].unread = (rooms[roomId].unread || 0) + 1;
+        else addMessage(data, "user");
+      }
+
+      renderUsersList();
+    });
+
+    // New user notification
+    socket.on("newUserMessage", (data) => {
+      const { roomId, senderName } = data;
+      if (!rooms[roomId]) {
+        rooms[roomId] = { messages: [], name: senderName || roomId, lastMessage: "", lastTime: new Date(), unread: 1 };
+        renderUsersList();
+      }
+    });
+  }
+
+  async function loadAllRooms() {
+    try {
+      const res = await fetch(`${SERVER_URL}/rooms`);
+      const data = await res.json();
+      data.forEach(r => {
+        if (!rooms[r._id]) {
+          rooms[r._id] = { messages: [], name: r._id, lastMessage: r.lastMessage, lastTime: r.lastTime, unread: 0 };
+        }
+      });
+      renderUsersList();
+    } catch (e) { console.error("Failed to load rooms", e); }
+  }
+
+  function renderUsersList() {
+    const list = document.getElementById("usersList");
+    const keys = Object.keys(rooms);
+
+    if (keys.length === 0) {
+      list.innerHTML = '<div class="empty-users">No conversations yet.<br/>Connect and wait for users.</div>';
+      return;
+    }
+
+    list.innerHTML = keys.map(roomId => {
+      const r = rooms[roomId];
+      const time = r.lastTime ? new Date(r.lastTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
+      const badge = r.unread ? `<span class="badge">${r.unread}</span>` : "";
+      return `
+        <div class="user-item ${roomId === activeRoomId ? "active" : ""}" onclick="selectRoom('${roomId}')">
+          <div class="u-name">👤 ${escapeHtml(r.name)}${badge}</div>
+          <div class="u-preview">${escapeHtml(r.lastMessage || "No messages yet")}</div>
+          <div class="u-time">${time}</div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  async function selectRoom(roomId) {
+    if (!socket) return alert("Connect as admin first");
+    activeRoomId = roomId;
+
+    // Join the room
+    socket.join && socket.emit("joinRoom", roomId); // emit joinRoom so server adds admin
+    socket.emit("joinRoom", roomId);
+
+    // Clear unread
+    if (rooms[roomId]) rooms[roomId].unread = 0;
+
+    // Update topbar
+    document.getElementById("chatTopbar").innerHTML = `
+      <div class="room-avatar">👤</div>
+      <div>
+        <h2>${escapeHtml(rooms[roomId]?.name || roomId)}</h2>
+        <p>Room: ${roomId}</p>
+      </div>
+    `;
+
+    // Enable input
+    document.getElementById("msgInput").disabled = false;
+    document.getElementById("msgInput").placeholder = "Reply to user...";
+    document.getElementById("sendBtn").disabled = false;
+
+    // Load messages
+    await loadRoomHistory(roomId);
+    renderUsersList();
+  }
+
+  async function loadRoomHistory(roomId) {
+    const messages = document.getElementById("messages");
+    messages.innerHTML = "";
+
+    try {
+      const res = await fetch(`${SERVER_URL}/messages/${roomId}`);
+      const data = await res.json();
+
+      if (data.length === 0) {
+        addSystemMsg("No messages yet in this conversation.");
+        return;
+      }
+
+      data.forEach(msg => {
+        addMessage(msg, msg.sender === "admin" ? "admin" : "user");
+      });
+
+      scrollBottom();
+    } catch (e) {
+      addSystemMsg("Failed to load messages.");
+    }
+  }
+
+  function sendMessage() {
+    if (!socket || !activeRoomId) return;
+    const input = document.getElementById("msgInput");
+    const message = input.value.trim();
+    if (!message) return;
+
+    const data = {
+      roomId: activeRoomId,
+      sender: "admin",
+      senderName: "Support",
+      message,
+    };
+
+    addMessage({ ...data, timestamp: new Date() }, "admin");
+    socket.emit("chatMessage", data);
+    input.value = "";
+  }
+
+  function addMessage(data, type) {
+    const messages = document.getElementById("messages");
+
+    // Remove no-chat placeholder if present
+    const noChat = messages.querySelector(".no-chat");
+    if (noChat) noChat.remove();
+
+    const row = document.createElement("div");
+    row.className = `msg-row ${type}`;
+    const time = new Date(data.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const label = type === "admin" ? "You (Admin)" : (data.senderName || "User");
+
+    row.innerHTML = `
+      <div class="msg-bubble">${escapeHtml(data.message)}</div>
+      <div class="msg-meta">${label} · ${time}</div>
+    `;
+    messages.appendChild(row);
+    scrollBottom();
+  }
+
+  function addSystemMsg(text) {
+    const messages = document.getElementById("messages");
+    const el = document.createElement("div");
+    el.className = "system-msg";
+    el.textContent = text;
+    messages.appendChild(el);
+    scrollBottom();
+  }
+
+  function scrollBottom() {
+    const messages = document.getElementById("messages");
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+</script>
+</body>
+</html>
