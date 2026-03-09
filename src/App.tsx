@@ -2,12 +2,15 @@ import { useState, useEffect } from "react";
 import "./App.css"
 import Sidebar from "./components/sideBar";
 import Searchbar from "./components/searchBar";
+import Navbar from "./components/navbar";
 
 export default function App() {
   return (
     <div className="pagecontainer">
       {/* <Sidebar/> */}
-      <Searchbar/>
+      {/* <Searchbar/> */}
+      <Navbar/>
+
     </div>
   );
 }
