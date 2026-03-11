@@ -69,7 +69,7 @@ import { Play}from "lucide-react"
   </div>
 
   <div className="sidebar-continue-item">
-    <img className="sidebar-continue-item-thumbnail" src="lupin.jpg" alt="Lupin" />
+    <img className="sidebar-continue-item-thumbnail" src='/assets/lupin.jpg' alt="Lupin" />
     <div className="sidebar-continue-item-info">
       <h4>Lupin Season 2</h4>
       <span>Episode 2</span>

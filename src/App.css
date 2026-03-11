@@ -310,7 +310,7 @@ body {
 
 
 .nowtrending__container {
-  background-image: url("./assets/ec32eba4ba7426141a6f535858b493f9.jpg");
+  background-image: url("https://i.pinimg.com/1200x/52/77/b5/5277b5d28000c2ead461dde7f84669fe.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -318,7 +318,6 @@ body {
   color: white;
   height: 55%;
   width: 60%;
-  
   position: absolute;
   left: 35%;   
   border-radius: 50px;   
@@ -359,7 +358,7 @@ max-width: 40%;
   
 }
 .controls button{
-  border: 1px solid black;
+  border: 1px solid rgba(0, 0, 0, 0.177);
   padding: 10px 20px 10px;
   border-radius:50px ;
 position: relative;
@@ -372,11 +371,21 @@ position: relative;
   background-color: transparent;
   color:white;
   border: 1px solid white;
-  
+  transition: background-color 1s ease;
+}
+.download:hover{
+  background-color: rgba(207, 211, 214, 0.4);
+   
 }
 .more{
-  background-color: transparent;
-  border-radius: 100%;
+padding: 10px;
+ padding: 8px 20px 3px; 
+ border-radius: 500px;
+ border: 1px solid white;
+ transition: background-color 1s ease;
+}
+.more:hover{
+  background-color:rgba(207, 211, 214, 0.285);;
 }
 .liked-container{
 
@@ -392,12 +401,17 @@ position: relative;
   
 }
 .liked-container-item{
+  background-image: url("./assets/flash2.jpg");
+   background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   margin-top: 5%;
   height: 60%;
   position: relative;
  width: 22%;
 background-color: rgba(142, 144, 145, 0.196);
   border-radius: 50px;
+  transition: scale 1s ease;
 
 }
 .dots{
@@ -448,7 +462,7 @@ background-color: rgba(142, 144, 145, 0.196);
   
 }
 .liked-description p{
-color: rgba(128, 128, 128, 0.568);  
+color: rgb(211, 211, 211);  
 }
 
 .liked-container-item h4{

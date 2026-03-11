@@ -3,6 +3,9 @@
 function Nowtrending(){
     return (
         <div className="nowtrending__container">
+           <video autoPlay muted loop playsInline>
+        <source src="/your-video.mp4" type="video/mp4" />
+      </video>
             <h6 className="small-header">Now Trending</h6>
             <div className="description">
                 <h2>Spider-Man:<br/>Across the spiderverse</h2>
@@ -24,9 +27,10 @@ function Nowtrending(){
       </button>
 
       {/* More Options Button */}
-      <button className="more">
+      <div  className="more">
+
         <MoreHorizontal size={20} />
-      </button>
+      </div>
 
     </div>
 
