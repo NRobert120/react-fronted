@@ -1,10 +1,23 @@
 import { Bell } from "lucide-react";
 import Searchbar from "./searchbar";
 
-export default function Navbar() {
+interface Movie {
+  _id: string;
+  name: string;
+  description: string;
+  genre: "sci-fi" | "action" | "crime" | "romance" | "horror";
+  picUrl: string;
+  views: number;
+}
+
+interface Props {
+  onMovieSelect: (movie: Movie) => void;  // ✅ receive from App
+}
+
+export default function Navbar({ onMovieSelect }: Props) {
   return (
     <div className="navbar">
-      <Searchbar />
+      <Searchbar onMovieSelect={onMovieSelect} />  {/* ✅ pass to Searchbar */}
       <ul className="navbar-list">
         <li className="navbar-list-item">Movie</li>
         <li className="navbar-list-item">Tv series</li>
@@ -12,7 +25,6 @@ export default function Navbar() {
         <li className="navbar-list-item">Mistery</li>
         <li className="navbar-list-item">Adventure</li>
       </ul>
-
       <div className="navbar-bellring">
         <Bell size={15} color="white" />
       </div>

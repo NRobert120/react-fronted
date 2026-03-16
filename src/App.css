@@ -92,6 +92,28 @@ body {
   position: relative;
   align-items: center;
 }
+.searchlist{
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  left: 4%;
+  background-color: rgba(176, 176, 177, 0.581);
+  backdrop-filter: blur(4px);
+  width: 20%;
+  top: 80%;
+  z-index: 3;
+  height: fit-content;
+  list-style: none;
+  border: 1px solid none;
+  border-radius: 20px;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  
+}
+.searchlist li{
+  list-style: none;
+}
 
 .searchbar__icon {
   position: absolute;
@@ -310,12 +332,11 @@ body {
 
 
 .nowtrending__container {
-  background-image: url("https://i.pinimg.com/1200x/52/77/b5/5277b5d28000c2ead461dde7f84669fe.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   margin-top: 6%;
-  color: white;
+  color: rgb(30, 29, 29);
   height: 55%;
   width: 60%;
   position: absolute;
@@ -345,7 +366,7 @@ body {
   word-break: break-all;
 }
 .description p{
-  color: rgba(128, 128, 128, 0.568);
+  color: rgb(224, 221, 221);
 }
 .controls{
   position:relative;
