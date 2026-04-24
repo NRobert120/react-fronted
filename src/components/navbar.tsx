@@ -5,7 +5,7 @@ interface Movie {
   _id: string;
   name: string;
   description: string;
-  genre: "sci-fi" | "action" | "crime" | "romance" | "horror";
+  genre: "sci-fi" | "action" | "animation" | "horror";
   picUrl: string;
   views: number;
 }
@@ -19,11 +19,11 @@ export default function Navbar({ onMovieSelect }: Props) {
     <div className="navbar">
       <Searchbar onMovieSelect={onMovieSelect} />  {/* ✅ pass to Searchbar */}
       <ul className="navbar-list">
-        <li className="navbar-list-item">Movie</li>
-        <li className="navbar-list-item">Tv series</li>
+        <li className="navbar-list-item" >All</li>
+        <li className="navbar-list-item">Action</li>
+        <li className="navbar-list-item">Horror</li>
+        <li className="navbar-list-item">Sci-fi</li>
         <li className="navbar-list-item">Animation</li>
-        <li className="navbar-list-item">Mistery</li>
-        <li className="navbar-list-item">Adventure</li>
       </ul>
       <div className="navbar-bellring">
         <Bell size={15} color="white" />

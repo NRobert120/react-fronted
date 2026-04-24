@@ -9,7 +9,7 @@ interface Movie {
   _id: string;
   name: string;
   description: string;
-  genre: "sci-fi" | "action" | "crime" | "romance" | "horror";
+  genre: "sci-fi" | "action" |"animation"| "horror";
   picUrl: string;
   views: number;
 }

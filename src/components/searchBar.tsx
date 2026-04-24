@@ -5,7 +5,7 @@ interface Movie {
   _id: string;
   name: string;
   description: string;
-  genre: "sci-fi" | "action" | "crime" | "romance" | "horror";
+  genre: "sci-fi" | "action" | "animation"| "horror";
   picUrl: string;
   views: number;
 }
@@ -16,7 +16,7 @@ interface ApiResponse {
 }
 
 interface Props {
-  onMovieSelect: (movie: Movie) => void;  // ✅ receive function from parent
+  onMovieSelect: (movie: Movie) => void;  
 }
 
 function Searchbar({ onMovieSelect }: Props) {
