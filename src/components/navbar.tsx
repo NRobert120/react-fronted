@@ -1,5 +1,5 @@
 import { Bell } from "lucide-react";
-import Searchbar from "./searchbar";
+import Searchbar from "./Searchbar";
 
 interface Movie {
   _id: string;
